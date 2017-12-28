@@ -3,7 +3,7 @@ Server-less & domain-less websites updatable via torrents and Slimcoin blockchai
 
 Originally coded for Bitcoin by elendirx (https://github.com/elendirx).
 
-[Live demo](https://d5000.github.io/web2web) (Does still not work; there is a block explorer missing.)
+[Live demo](https://d5000.github.io/web2web) (Should work now, but block-exploring SPARQL server may have outages.)
 
 [Original live demo on the Bitcoin blockchain](https://elendirx.github.io/web2web/)
 
