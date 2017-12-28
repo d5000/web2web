@@ -64,7 +64,7 @@ $("form").on("submit", function(event) {
     var slmAddress = $(this).find('[name=address]').val();
     $(document).ready(function() {
         var magnetBase = 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:';
-        var baseurl = 'http://localhost:3030/slmchain/sparql?query=';
+        var baseurl = 'http://185.121.25.146:3030/slmchain/sparql?query=';
         var sparql1 = encodeURIComponent('PREFIX ccy: <http://purl.org/net/bel-epa/ccy#> SELECT DISTINCT ?tx ?datestamp ?asm WHERE { ?txoa ccy:address ccy:');
         var sparql2 = encodeURIComponent(' . ?tx ccy:output ?txoa . ?tx ccy:output ?txob . ?txob ccy:pkasm ?asm . ?tx ccy:time ?datestamp FILTER regex(?asm, "OP_RETURN") } ORDER BY DESC(?datestamp) LIMIT 1');
         var query = baseurl + sparql1 + slmAddress + sparql2;
