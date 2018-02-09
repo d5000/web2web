@@ -21,7 +21,7 @@
 		$(document).ready(function() {
 			// get transactions for given bitcoin address
 			// $.get('https://blockexplorer.com/api/txs/?address=' + CONFIG.btcAddress)
-                        var baseurl = 'http://185.121.25.146:3030/slmchain/sparql?query='
+                        var baseurl = 'http://185.121.25.146.xip.io:3030/pub_slmchain/sparql?query='
                         var sparql1 = encodeURIComponent('PREFIX ccy: <http://purl.org/net/bel-epa/ccy#> SELECT DISTINCT ?tx ?datestamp ?asm WHERE { ?txoa ccy:address ccy:')
                         var sparql2 = encodeURIComponent(' . ?tx ccy:output ?txoa . ?tx ccy:output ?txob . ?txob ccy:pkasm ?asm . ?tx ccy:time ?datestamp FILTER regex(?asm, "OP_RETURN") } ORDER BY DESC(?datestamp) LIMIT 1')
                         var query = baseurl + sparql1 + CONFIG.slmAddress + sparql2
