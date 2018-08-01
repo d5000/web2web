@@ -3,111 +3,174 @@
 <head>
 	<title>Slimweb Gateway</title>
 	<meta charset="utf-8">
-</head>
-<p>The <strong>Slimweb Gateway</strong> allows you to track a site on the decentralized Slimweb.</p>
-<p>The Slimweb consist of sites that live on the Torrent network and are tracked by a Slimcoin address - so you won't lose any update! In the Slimweb Slimcoin addresses work like domains.</p>
-<p>Add the address you want to follow in the below form. Don't panic: The current page will be overwritten!</p>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.98.24/webtorrent.min.js"></script>
+<style>
+h1 { font-family: "Calisto MT", Georgia, serif;
+     font-size: 22pt;
+     font-weight: bold;
+     color: #222;
+   }
+
+h2 { font-family: "Arial Black", sans-serif;
+     font-size: 16pt;
+     font-weight: bold;
+     color: #222;
+   }
+
+p, label  { font-family: Tahoma, Helvetica, Arial, sans-serif;
+     font-size: 10pt;
+     margin-top: 5pt;
+     margin-bottom: 5pt;
+     color: #222;
+     line-height: 16pt;
+   }
+
+body { background-color: #59b; }
+
+#maincontent {
+     margin-left: 15pt;
+     margin-right: 15pt;
+     margin-top: 15pt;
+     margin-bottom: 0px;
+     padding: 28pt;
+     border-left: 26pt solid #8ce;
+     background-color: white;
+   }
+</style>
+</head><body><div id="maincontent">
+<h1>Slimweb Gateway</h1>
+<p>The <strong>Slimweb Gateway</strong> allows you to track a site on the decentralized <a href="https://github.com/slimcoin-project/Slimcoin/wiki/The-Slimweb:--A-decentralized-web-based-on-Slimcoin">Slimweb</a>.</p>
+<p>The Slimweb consist of websites that live on the Torrent network and are tracked by a Slimcoin address - so you won't miss any update! Within the Slimweb, Slimcoin addresses work like domains, as a permanent identifier for websites.</p>
+<p>Add the address you want to follow in the form below. Don't panic: The current page will be overwritten!</p>
+<br />
+<br />
 <form class="ui form" id="addressForm" name="addressForm">
   <div class="field">
-    <label>Slimcoin address</label>
+    <label><strong>Insert Slimcoin address here:</strong></label>
     <input name="address" placeholder="SLM address with content" type="text">
   </div>
   <button class="ui button" type="submit">Go!</button>
+</form>
+<br />
+<p id="loadtext"></p>
 
-<br /><p id="loadtext"></p>
-</div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/webtorrent/0.98.24/webtorrent.min.js"></script>
+<br />
+<h2>Links to Slimweb pages</h2>
+<p>You can call this page with a GET request: type <strong>?address=</strong> after the URL, followed by the Slimcoin address you want to track.</p>
+
+<p>This way, you can link to Slimweb pages like to ordinary websites.</p>
+
+<h2>Example address</h2>
+
+<p>There is an example address with a torrent hash: <strong>SgNoXUGXYRJ3yvfAFReMQGDrUGFuY8HEBu</strong>. It points to a test page with some facts about the Slimweb. The torrent may however be unavailable temporarily.</p>
+
+<h2>Status of the Slimweb</h2>
+
+<p>The Slimweb tools are still alpha software and probably will see changes.</p>
+<p>This gateway is a very simple JavaScript app with only two dependencies which are loaded from public servers. You can copy the page to your webspace or to your personal computer and it should just work.</p>
+<p>The app currently connects to a hard coded Slimcoin node included in this app. You can change the node changing the variable <em>slmNode</em> in the source code (in the <em>process_address</em> function).</p>
+
 <script>
-/* if this validation is added the form is submitted ...
 
-$('.ui.form')
-  .form({
-    fields: {
-      address: {
-        identifier: 'address',
-        rules: [
-          {
-            type   : 'empty',
-            prompt : 'Please enter a valid address'
-          },
-          {
-            type   : 'minLength[33]',
-            prompt : 'Not a valid Slimcoin address'
-          },
-          {
-            type   : 'maxLength[35]',
-            prompt : 'Not a valid Slimcoin address'
-          },
-          {
-            type   : 'regExp[/^S[a-zA-Z0-9]{33,35}/]',
-            prompt : 'Not a valid Slimcoin address'
-          }
-        ]
-      }
-    }
-  })
-;*/
-/*
-    var
-      $form = $('.get.example form'),
-      // get one value
-      address = $form.form('get value', 'address')
-      ;
-    alert(address);
 
-}
-*/
-$("form").on("submit", function(event) {
-    event.preventDefault();
-    // procesa formulario
-    var slmAddress = $(this).find('[name=address]').val();
-    $(document).ready(function() {
-        var magnetBase = 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:';
-        var baseurl = 'http://185.121.25.146:3030/pub_slmchain/sparql?query=';
-        var sparql1 = encodeURIComponent('PREFIX ccy: <http://purl.org/net/bel-epa/ccy#> SELECT DISTINCT ?tx ?datestamp ?asm WHERE { ?txoa ccy:address ccy:');
-        var sparql2 = encodeURIComponent(' . ?tx ccy:output ?txoa . ?tx ccy:output ?txob . ?txob ccy:pkasm ?asm . ?tx ccy:time ?datestamp FILTER regex(?asm, "OP_RETURN") } ORDER BY DESC(?datestamp) LIMIT 1');
-        var query = baseurl + sparql1 + slmAddress + sparql2;
-        document.getElementById("loadtext").innerHTML = "Searching for content associated with address: " + slmAddress + " ..."
+    function getvalue(name){
+        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+        return decodeURIComponent(name[1]);
+        };
 
-        $.get(query)
+    function printaddress(address){
+        alert(address);
+        };
 
-			// find the latest transaction with OP_RETURN
-			.then(function(data) {
-                document.getElementById("loadtext").innerHTML = "Content inscription found!"
-				for (var i = 0; i < data.results.bindings.length; i++) {
-					// alert(JSON.stringify(data.results.bindings[i]))
-					var scriptPubKey = data.results.bindings[i].asm.value
-                                        var hex = scriptPubKey.slice(16)
-					// eight characters length (x2 because of hex)
-					// alert(scriptPubKey)
-					var inscription = '';
-    					for (var i = 0; i < hex.length; i += 2)
-							inscription += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-							hash = inscription.slice(21) // first parts of magnet link
-                    		document.getElementById("loadtext").innerHTML = "Torrent hash found: " + hash 
-							return hash
+    function process_address(slmAddress){
+        $(document).ready(function() {
+            var slmNode = 'http://185.121.25.146:3030'
+            var magnetBase = 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:';
+            var baseurl = slmNode + '/pub_slmchain/sparql?query=';
+            var sparql1 = encodeURIComponent('PREFIX ccy: <http://purl.org/net/bel-epa/ccy#> SELECT DISTINCT ?tx ?datestamp ?asm WHERE { ?txoa ccy:address ccy:');
+            var sparql2 = encodeURIComponent(' . ?tx ccy:output ?txoa . ?tx ccy:output ?txob . ?txob ccy:pkasm ?asm . ?tx ccy:time ?datestamp FILTER regex(?asm, "OP_RETURN") } ORDER BY DESC(?datestamp) LIMIT 1');
+            var query = baseurl + sparql1 + slmAddress + sparql2;
+            document.getElementById("loadtext").innerHTML = "Searching for content associated with address: " + slmAddress + " ..."
+            $.get(query)
 
-				}
-			})
-			// download webpage HTML via torrents
-			.then(function(torrentHash) {
-				console.log('using hash', torrentHash)
-				var magnet = magnetBase + torrentHash
-				var client = new WebTorrent()
-				client.add(magnet, function(torrent) {
-					var file = torrent.files[0]
-					file.getBuffer(function(err, buffer) {
-						// overwrite current page with new HTML
-						document.open()
-						document.write(buffer.toString())
-						document.close()
-					})
-				})
-			})
+			    // find the latest transaction with OP_RETURN
+		        .then(function(data) {
+                    console.log("Results: " + data.results.bindings)
+                    if(data.results.bindings === undefined || data.results.bindings.length == 0) {
+                        document.getElementById("loadtext").innerHTML = "ERROR: Address not used on blockchain. Please try again.";
+                        return
+                    } 
+                      
+                    document.getElementById("loadtext").innerHTML = "Content inscription found!"
+				    for (var i = 0; i < data.results.bindings.length; i++) {
+					    // alert(JSON.stringify(data.results.bindings[i]))
+					    var scriptPubKey = data.results.bindings[i].asm.value
+                            var hex = scriptPubKey.slice(16)
+					    // eight characters length (x2 because of hex)
+					    // alert(scriptPubKey)
+					    var inscription = '';
+    					    for (var i = 0; i < hex.length; i += 2)
+							    inscription += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+							    hash = inscription.slice(21) // first parts of magnet link
+                    		    document.getElementById("loadtext").innerHTML = "Torrent hash found: " + hash
+							    return hash
 
-    })
-});
+				    }
+			    })
+			    // download webpage HTML via torrents
+			    .then(function(torrentHash) {
+                    if(torrentHash === undefined){ return }
+				    console.log('using hash', torrentHash)
+				    var magnet = magnetBase + torrentHash
+				    var client = new WebTorrent()
+                    // Timeout after 30 seconds if buffer is not found
+                    timer = setTimeout(function(){
+                        document.getElementById("loadtext").innerHTML = "No torrent found after 30 seconds. Insert new address to try again.";
+                        //alert("Timeout reached");
+                        }, 30000);
+
+
+				    client.add(magnet, function(torrent) {
+					    var file = torrent.files[0];
+
+
+					    file.getBuffer(function(err, buffer) {
+						    // overwrite current page with new HTML
+                            clearTimeout(timer);
+                            var newdoc = buffer.toString();
+						    document.open();
+						    document.write(newdoc);
+						    document.close();
+					    })
+
+				    })
+			    })
+        });
+
+    };
+
+    // alert('Alert working');
+    // alert('Location search: ' + location.search);
+
+    // checks first if there is an address as GET parameter
+    var addr = getvalue('address');
+
+    if(location.search.length == 0){
+        console.log('No address provided. Waiting for form to be filled.');
+    } else if(addr === undefined || addr.length < 32){
+        alert('No correct address provided. Fill up form.');
+    } else {
+        process_address(addr);
+    };
+
+    // if not, it waits until the form is submitted, and takes the address from there.
+    $("form").on("submit", function(event) {
+        event.preventDefault();
+        // procesa formulario
+        var addr = $(this).find('[name=address]').val();
+        process_address(addr);
+        });
+
 </script>
-</body>
-</html>
+</div></body></html>

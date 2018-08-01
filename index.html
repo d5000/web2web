@@ -9,6 +9,7 @@
 <body>
 	<h1>Loading ...</h1>
 	<p id="loadtext">Searching for content ...</p>
+	<p id="loadtext2"></p>
 
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
@@ -16,12 +17,14 @@
 	<script>
 		var CONFIG = {
 			slmAddress: 'SgNoXUGXYRJ3yvfAFReMQGDrUGFuY8HEBu',
-			magnetBase: 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:'
+			magnetBase: 'magnet:?dn=index.html&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=wss%3A%2F%2Ftracker.btorrent.xyz&tr=wss%3A%2F%2Ftracker.fastcast.nz&tr=wss%3A%2F%2Ftracker.openwebtorrent.com&tr=wss%3A%2F%2Ftracker.webtorrent.io&xt=urn:btih:',
+            ipAddress: '185.121.25.146'
 		}
 		$(document).ready(function() {
 			// get transactions for given bitcoin address
 			// $.get('https://blockexplorer.com/api/txs/?address=' + CONFIG.btcAddress)
-                        var baseurl = 'http://185.121.25.146.xip.io:3030/pub_slmchain/sparql?query='
+                        // var baseurl = 'http://185.121.25.146.xip.io:3030/pub_slmchain/sparql?query='
+                        var baseurl = 'http://' + CONFIG.ipAddress + '.xip.io:3030/pub_slmchain/sparql?query='
                         var sparql1 = encodeURIComponent('PREFIX ccy: <http://purl.org/net/bel-epa/ccy#> SELECT DISTINCT ?tx ?datestamp ?asm WHERE { ?txoa ccy:address ccy:')
                         var sparql2 = encodeURIComponent(' . ?tx ccy:output ?txoa . ?tx ccy:output ?txob . ?txob ccy:pkasm ?asm . ?tx ccy:time ?datestamp FILTER regex(?asm, "OP_RETURN") } ORDER BY DESC(?datestamp) LIMIT 1')
                         var query = baseurl + sparql1 + CONFIG.slmAddress + sparql2
@@ -55,16 +58,27 @@
 					var inscription = '';
     					for (var i = 0; i < hex.length; i += 2)
 							inscription += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-							hash = inscription.slice(21) // first parts of magnet link
-                    		document.getElementById("loadtext").innerHTML = "Torrent hash found: " + hash 
-							return hash
+							// hash = inscription.slice(21) // first parts of magnet link
+                            var hashmarker = inscription.indexOf("btih:") + 5;
+                            var urlmarker = inscription.indexOf("&ws=") + 4;
+                            var hash = inscription.slice(hashmarker);
+                    		document.getElementById("loadtext").innerHTML = "Torrent hash found: " + hash
+                            if (urlmarker = 3) {
+								document.getElementById("loadtext2").innerHTML = "No Web Seed URL found."
+							} else {
+								var url = inscription.slice(urlmarker);
+								document.getElementById("loadtext2").innerHTML = "Web seed URL found: " + url
+							}
+							return [ hash, url ]
 
 				}
 			})
 			// download webpage HTML via torrents
-			.then(function(torrentHash) {
+			.then(function(result) {
+                torrentHash = result[0]
+                webseedURL = encodeURI(result[1])
 				console.log('using hash', torrentHash)
-				var magnet = CONFIG.magnetBase + torrentHash
+				var magnet = CONFIG.magnetBase + torrentHash + "&ws=" + webseedURL
 				var client = new WebTorrent()
 				client.add(magnet, function(torrent) {
 					var file = torrent.files[0]
